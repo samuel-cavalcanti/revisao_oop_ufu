@@ -37,8 +37,8 @@ só mudam o tipo de formulário.
 
 ```java
 public class AddBookPageSwing extends javax.swing.JFrame {
-
-    public static final String pageName = "Livros"; // em AddReviewPageSwing muda o valor para Revistas
+    // em AddReviewPageSwing muda o valor para Revistas
+    public static final String pageName = "Livros"; 
 
     private final BookSwingForm bookForm;
     final MenuButtonsSwing menuButtons;
@@ -152,8 +152,11 @@ A aplicação foi ou meu ver bem dividia em subproblemas mas, é uma gambiarra. 
 ## Prints da Aplicação
 
 ![Livros](docs/livros.png)
+
 ![Revistas](docs/revistas.png)
+
 ![Listagem](docs/listagem.png)
+
 ![tratamento de erro](docs/tratamento_de_erro.png)
 
 [ListPageSwing]:src/main/java/reviso_oop/listItens/ListPageSwing.java
