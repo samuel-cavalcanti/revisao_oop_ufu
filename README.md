@@ -1,44 +1,15 @@
-# Revisão OOP
+# Uso de APIs para Banco de dados e Junit
 
-Resolução do exercício [Prova Substitutiva](docs/Prova%20Substitutiva%201.pdf)
+## Refatorações
 
-## Single Principle Responsibility
-
-Nessa questão, percebi que o problema pode ser dividido nos subproblemas:
-
-- Problema de Navegação em um aplicativo
-
-- Problema de submissão de um dado por meio de um formulário
-
-- Problema do armazenamento de dados
-
-- Problema de visualização de dados armazenados
-
-Busquei tentar o máximo de coesão nas classes criando uma classe responsável criei as seguintes classes:
-
-- para a navegação entre telas [SwingNavigator][SwingNavigator],
-
-- para cada formulário [BookSwingForm][BookSwingForm],
-[ReviewSwingForm][ReviewSwingForm],
-
-- para o armazenamento de dados [LibraryDataBase][LibraryDataBase]
-
-- uma view simples para visualizar os dados [ListPageSwing][ListPageSwing]
-
-Observe que toda classe que possui __Swing__ no nome faz parte do domínio da view.
-
-## Falhas ao Aplicar o SPR
-
-Uma dificuldade encontrada durante essa atividade foi uma forma de refatorar o código da
-tela de formulário, infelizmente não tive conhecimento de aplicar algum design pattern ou
-lógica para eliminar a duplicação de código presente nas classes [AddBookPageSwing][AddBookPageSwing]
-e [AddReviewPageSwing][AddReviewPageSwing], basicamente ambas possuem o mesmo código de inicialização
-só mudam o tipo de formulário.
+Com o objetivo de refatorar o código da primeira atividade
+[revisão oop](Revisao_oop.md), adicionar um banco de dados simples e fazer uma cobertura mínima de testes. Apliquei a
+técnica da inversão da dependência nós formulários em relação na página. Ná primeria versão:
 
 ```java
 public class AddBookPageSwing extends javax.swing.JFrame {
     // em AddReviewPageSwing muda o valor para Revistas
-    public static final String pageName = "Livros"; 
+    public static final String pageName = "Livros";
 
     private final BookSwingForm bookForm;
     final MenuButtonsSwing menuButtons;
@@ -52,118 +23,211 @@ public class AddBookPageSwing extends javax.swing.JFrame {
         setVisible(true);
 
         database = LibraryDataBase.getInstance(); // Singleton
-        bookForm = new BookSwingForm(); // muda  para new ReviewSwingForm(); 
+        bookForm = new BookSwingForm(); // vai virar abstrato
         menuButtons = new MenuButtonsSwing(pageName);
+```
 
-        buildContainer();
+Para resolver esse problema, foi criado a [__SwingForm__](src/main/java/revisao_oop/formPage/swingForm/SwingForm.java)
 
-        menuButtons.addButton.addActionListener(new ActionListener() {
+```java
+public abstract class SwingForm extends JComponent {
+
+    public abstract void submit();
+}
+```
+
+dessa forma não é mais necessário criar um __JFrame__ para cada formulário, pois agora o formulário que depende da __
+JFrame__:
+
+```java
+public class FormPageSwing extends javax.swing.JFrame {
+
+    private final SwingForm form;
+    private final MenuButtonsSwing menuButtons;
+    private final String pageName;
+
+    public FormPageSwing(SwingForm form, String pageName) {
+        this.pageName = pageName;
+        this.form = form;
+        ....
+```
+
+Uma vez refatorado o formulário da página, foi aplicado o desing Model View Controller (MVC), no formulário, onde o
+Model são as estrutas: [Book](src/main/java/revisao_oop/models/Book.java)
+e [Review](src/main/java/revisao_oop/models/Review.java). Isso remove completamente as regras de negócio da view.
+
+Também foi refatorado o LibraryDataBase, onde foi extraído uma interface:
+
+```java
+public interface LibraryRepository {
+    void add(@NotNull Book b);
+
+    void add(@NotNull Review r);
+
+    @NotNull
+    List<Book> getBooks();
+
+    @NotNull
+    List<Review> getReviews();
+}
+```
+
+e um módulo chamado __InputValidation__ que até o momento é responsável por higienizar o input não confiável do usuário.
+Idealmente esse modulo deveria verificar além dos campos, estiverem vazios, se existe algum tipo de __sql injection__,
+mas no momento só verifica se os campos estão vazios.
+
+## Banco de dados
+
+Não tem como Desvincular a escolha do banco do gosto pessoal, particularmente, prefiro fazer a persistência dos dados
+com o [__SQlite3__](https://www.sqlitetutorial.net/). SQlite 3, junta a simplicidade de armazenar num único arquivo com
+a velocidade de um banco SQL. Quanto a sua implementação, foi utilizado o JDBC. Para popular banco foi criado um
+simples [script sql](create_db.sql)
+que cria duas tabelas: Books e Reviews, insere 3 itens para
+cada tabela e caso já exista essas tabelas, ele exclui ambas.
+Para executar o script:
+```shell
+chmod +x reset_db.sh
+./reset_db.sh
+```
+O script assume que você possui o SQlite3.
+
+## Testes Unitários Automatizados
+
+Se observarmos o enunciado da questão da revisão vemos
+que a principal regra de negócio do sistema é a inserção
+de dados e a recuperação desses dados, logo
+foi feito duas suites de testes unitários, um demonstrado
+o caminho feliz e triste da validação dos inputs do usuário
+e outro fazendo o teste da recuperação e inserção de dados
+no banco.
+
+### teste unitário da validação do input do usuário
+```java
+class InputValidationTest {
+
+
+    @Test
+    void testBook() {
+        Book b = new Book("title", "author", "1996");
+        Book b1 = new Book("title", "author", "1996");
+        Book validatedBook = new BookValidation().validate(b);
+        assertTrue(validatedBook.mEquals(b1));
+        assertThrows(IncorrectInputException.class, new Executable() {
             @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-
-                try {
-                    database.add(bookForm.getModel());
-                    bookForm.labelsToBlack();
-
-                } catch (IncorrectInputError error) {
-                    bookForm.labelsToRed();
-                }
-
-
+            public void execute() {
+                Book b2 = new Book("", b.author, b.year);
+                new BookValidation().validate(b2);
             }
         });
 
+        String expected = "Livro: " + validatedBook.title + " " + validatedBook.author + " " + validatedBook.year;
 
-        pack();
+        assertEquals(expected, validatedBook.toPrettyString());
+
     }
 
-    private void buildContainer() {
-        Container container = getContentPane();
+    @Test
+    void testReview() {
+        Review r = new Review("title", "org", "vol", "666", "1999");
+        Review r1 = new Review("title", "org", "vol", "666", "1999");
+        assertTrue(r.mEquals(r1));
 
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        Review validatedReview = new ReviewValidation().validate(r);
+        assertTrue(validatedReview.mEquals(r));
 
-        container.add(new Label(pageName, Label.CENTER));
+        assertThrows(IncorrectInputException.class, new Executable() {
+            @Override
+            public void execute() {
+                Review r = new Review("", "org", "vol", "666", "1999");
+                new ReviewValidation().validate(r);
+            }
+        });
 
-        container.add(bookForm);
+        String expected = "Revista: " + r.title + " " + r.organization + " " + r.volume + " " + r.number + " " + r.year;
 
-        container.add(menuButtons);
+        assertEquals(expected, r.toPrettyString());
     }
 }
 ```
 
-Esse problema provoca que se for necessário criar uma outra tela para por exemplo uma nova
-estrutura chamada __Jornal__, será necessário basicamente copiar e colocar essa classe e
-adicionar um novo método em [LibraryDataBase][LibraryDataBase] __addJournal__
+### teste unitário do funcionamento da inserção e recuperação de dados
 
 ```java
-//LibraryDataBase.java
+class LibrarySqliteRepositoryTest {
 
-void addBook(Book b){
-    ...
-}
+    @Test
+    void testSqlRepository() {
+        LibraryRepository sqlRepo = LibrarySqliteRepository.getInstance();
 
-void addReview(Review b){
-    ...
-}
+        List<Book> books = sqlRepo.getBooks();
+        List<Review> reviews = sqlRepo.getReviews();
 
-void addJournal(Journal j){
-    //....
+        assertFalse(books.isEmpty());
+        assertFalse(reviews.isEmpty());
+
+        int booksSize = books.size();
+        int reviewsSize = reviews.size();
+
+        Book test = new Book("test", "junit", "2020");
+        Review testReview = new Review("test", "JUNIT USER GUILDE", "5", "8.7.2", "2020");
+        sqlRepo.add(test);
+        sqlRepo.add(testReview);
+
+        List<Book> newBooks = sqlRepo.getBooks();
+        List<Review> newReviews = sqlRepo.getReviews();
+        assertEquals(booksSize + 1, newBooks.size());
+        assertEquals(reviewsSize + 1, newReviews.size());
+
+
+    }
+
 }
 ```
-
-Penso que modificar LibraryDataBase não está errado, uma vez que
-adicionar uma nova estrutura realmente provoca uma mudança no LibraryDataBase
-mas se continuar sempre adicionando um novo método, eventualmente ficara extremamente
-difícil de prestar manutenção, pois se escrevo 70 linhas por estrutura, se eu tiver
-5 estruturas, logo  70*5 = 1050 linhas de código. Imagino que uma biblioteca de verdade
-tenha mais que 5 estruturas.
-
-## Design Patterns Utilizados
-
-Ao longo do trabalho só foi utilizado um único design pattern o [Singleton][SingletonWiki]
-Esse padrão garante que a existência de um única classe para toda a aplicação, ela foi utilizado
-tanto na classe de armazenamento [LibraryDataBase][LibraryDataBase] tanto no navegador [SwingNavigator][SwingNavigator], onde ao meu ver, na aplicação haver apenas uma estância
-de classe que controla a navegação do app, como sómente uma única classe responsável
-para o armazenamento de dados.
-
-## Conclusão
-
-Como feito anteriormente através de uma simples conta de matemática, para cada nova
-estrutura o número de linhas em um arquivo iria crescer linearmente, junto com número de
-__SwingPages__:
-
-```c
-f(x) = 70x
-//e o número de paginas também cresceria linearmente
-f(x) = x
+Para rodar os testes:
+```shell
+./gradlew test 
 ```
 
-A aplicação foi ou meu ver bem dividia em subproblemas mas, é uma gambiarra. Infelizmente não sei ajeitar, desculpe a minha ignorância.
+Também foi pensado em testar os controllers dos formularios,
+mas como eles quasem não possuem código, não é necessário
+demonstrar o seu funcionamento.
 
-## Para executar a aplicação
+```java
+//ReviewFromController.java
+public class ReviewFormController implements FormController<Review> {
 
-```bash
-# no linux, mac
-./gradlew run
-# Talvez no windows seja
- gradlew run 
+    private final LibraryRepository dataBase;
+
+    public ReviewFormController(LibraryRepository db) {
+        dataBase = db;
+    }
+
+    @Override
+    public void sendModelToDataBase(@NotNull Review r) {
+        dataBase.add(r);
+    }
+}
+// BookFormController.java
+public class BookFormController implements FormController<Book> {
+    private final LibraryRepository database;
+
+    public BookFormController(LibraryRepository database) {
+        this.database = database;
+    }
+
+    @Override
+    public void sendModelToDataBase(@NotNull Book b) {
+        database.add(b);
+    }
+}
 ```
+Observe que usamos os decorators __@NotNull__ de uma lib mantida
+pela Intellij que garante que o parâmetro não possa ser nulo,
+caso for percebido que o valor pode ser nulo, o código não
+Compila. O que reduz ainda mais o que testar. Novamente
+nos deparamos com uma duplicação de código onde julguei que não
+devo tentar resolver.
 
-## Prints da Aplicação
-
-![Livros](docs/livros.png)
-
-![Revistas](docs/revistas.png)
-
-![Listagem](docs/listagem.png)
-
-![tratamento de erro](docs/tratamento_de_erro.png)
-
-[ListPageSwing]:src/main/java/revisao_oop/listItens/ListPageSwing.java
-[LibraryDataBase]:src/main/java/revisao_oop/libraryRepository/LibraryDataBase.java
-[BookSwingForm]:src/main/java/revisao_oop/formPage/BookSwingForm.java
-[ReviewSwingForm]:src/main/java/revisao_oop/formPage/ReviewSwingForm.java.java
-[AddBookPageSwing]:src/main/java/revisao_oop/formPage/AddBookPageSwing.java
-[AddReviewPageSwing]:src/main/java/revisao_oop/formPage/AddReviewPageSwing.java
-[SwingNavigator]:/revisao_oop/SwingNavigator.java
-[SingletonWiki]:https://pt.wikipedia.org/wiki/Singleton
+## Referências
+Para entender como cheguei nessas modificações, seja legal
+dar uma lida no trabalho inicial [Revisão OOP](Revisao_oop.md)

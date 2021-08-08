@@ -45,9 +45,9 @@ public class LibrarySqliteRepository implements LibraryRepository {
             ResultSet resultSet = statement.executeQuery();
             return resultSet.getInt(colName);
 
-        } catch (SQLException throwables) {
+        } catch (SQLException e) {
             System.out.println("Não foi possível achar a ultima Chave Primária: " + colName + " Na tabela: " + tableName);
-            System.out.println(throwables.getMessage());
+            System.out.println(e.getMessage());
             System.exit(-1);
         }
 
@@ -178,6 +178,7 @@ public class LibrarySqliteRepository implements LibraryRepository {
         if (resultSet == null)
             return reviews;
 
+
         try {
             while (resultSet.next()) {
                 String title = resultSet.getString("title");
@@ -189,9 +190,9 @@ public class LibrarySqliteRepository implements LibraryRepository {
                 reviews.add(new Review(title, organization, volume, number, year));
             }
 
-        } catch (SQLException throwables) {
+        } catch (SQLException e) {
             System.out.println("Não foi possível Transformar o ResultSet em uma lista de Revistas");
-            System.out.println(throwables.getMessage());
+            System.out.println(e.getMessage());
         }
 
         return reviews;

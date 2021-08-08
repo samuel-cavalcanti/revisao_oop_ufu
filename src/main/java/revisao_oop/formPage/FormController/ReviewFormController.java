@@ -6,7 +6,7 @@ import revisao_oop.models.Review;
 
 public class ReviewFormController implements FormController<Review> {
 
-    final LibraryRepository dataBase;
+    private final LibraryRepository dataBase;
 
     public ReviewFormController(LibraryRepository db) {
         dataBase = db;
