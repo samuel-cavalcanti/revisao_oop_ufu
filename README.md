@@ -4,7 +4,8 @@
 
 Com o objetivo de refatorar o código da primeira atividade
 [revisão oop](Revisao_oop.md), adicionar um banco de dados simples e fazer uma cobertura mínima de testes. Apliquei a
-técnica da inversão da dependência nós formulários em relação na página. Ná primeria versão:
+técnica da inversão da dependência nós formulários em relação 
+na página. Ná primeria versão:
 
 ```java
 public class AddBookPageSwing extends javax.swing.JFrame {
@@ -36,8 +37,8 @@ public abstract class SwingForm extends JComponent {
 }
 ```
 
-dessa forma não é mais necessário criar um __JFrame__ para cada formulário, pois agora o formulário que depende da __
-JFrame__:
+dessa forma não é mais necessário criar um __JFrame__ para cada formulário, pois agora o formulário que depende da
+__JFrame__:
 
 ```java
 public class FormPageSwing extends javax.swing.JFrame {
