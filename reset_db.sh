@@ -1,0 +1,1 @@
+sqlite3 auction.db < create_db.sql

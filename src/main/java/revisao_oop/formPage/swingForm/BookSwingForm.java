@@ -1,11 +1,12 @@
-package reviso_oop.addModel;
+package revisao_oop.formPage.swingForm;
 
-import reviso_oop.DefaultModelSwingForm;
-import reviso_oop.models.Book;
+import revisao_oop.formPage.DefaultSwingForm;
+import revisao_oop.formPage.FormController.FormController;
+import revisao_oop.models.Book;
 
 import javax.swing.*;
 
-public class BookSwingForm extends DefaultModelSwingForm<Book> {
+public class BookSwingForm extends DefaultSwingForm<Book> {
     private final JTextField titleTextField;
     private final JTextField authorTextField;
     private final JTextField yearTextField;
@@ -14,7 +15,8 @@ public class BookSwingForm extends DefaultModelSwingForm<Book> {
     private final JLabel authorLabel;
     private final JLabel yearLabel;
 
-    public BookSwingForm() {
+    public BookSwingForm(FormController<Book> controller ) {
+        super(controller);
         titleTextField = new JTextField();
         authorTextField = new JTextField();
         yearTextField = new JTextField();

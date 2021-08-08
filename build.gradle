@@ -3,12 +3,31 @@ apply plugin: 'jacoco'
 apply plugin: 'application'
 
 
-mainClassName = 'reviso_oop.Main'
+mainClassName = 'revisao_oop.Main'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation     'junit:junit:4.13'
+    implementation 'org.jetbrains:annotations:20.1.0'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+    // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: '3.36.0.1'
+
+}
+
+sourceSets {
+    test {
+        java.srcDirs 'src/main/java/tests'
+    }
+}
+
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+    useJUnitPlatform()
 }

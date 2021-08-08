@@ -1,14 +1,15 @@
-package reviso_oop.addModel;
+package revisao_oop.formPage.swingForm;
 
-import reviso_oop.DefaultModelSwingForm;
-import reviso_oop.models.Review;
+import revisao_oop.formPage.DefaultSwingForm;
+import revisao_oop.formPage.FormController.FormController;
+import revisao_oop.models.Review;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ReviewSwingForm extends DefaultModelSwingForm<Review> {
-    final JTextField titleTextField;
-    final JTextField orgTextField;
+public class ReviewSwingForm extends DefaultSwingForm<Review> {
+    private final JTextField titleTextField;
+    private final JTextField orgTextField;
 
     private final JTextField volumeTextField;
     private final JTextField numberTextField;
@@ -22,7 +23,9 @@ public class ReviewSwingForm extends DefaultModelSwingForm<Review> {
     private final JLabel numberLabel;
     private final JLabel yearLabel;
 
-    public ReviewSwingForm() {
+    public ReviewSwingForm(FormController<Review> reviewFormController) {
+        super(reviewFormController);
+
         titleTextField = new JTextField();
         orgTextField = new JTextField();
         volumeTextField = new JTextField();
@@ -106,5 +109,6 @@ public class ReviewSwingForm extends DefaultModelSwingForm<Review> {
                 numberLabel,
                 yearLabel};
     }
+
 
 }

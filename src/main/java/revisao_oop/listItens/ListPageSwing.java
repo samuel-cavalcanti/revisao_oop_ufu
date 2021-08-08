@@ -1,21 +1,22 @@
-package reviso_oop.listItens;
+package revisao_oop.listItens;
 
-import reviso_oop.libraryDataBase.LibraryDataBase;
-import reviso_oop.models.Book;
-import reviso_oop.models.Review;
+import revisao_oop.libraryRepository.LibraryRepository;
+import revisao_oop.libraryRepository.sqliteRepository.LibrarySqliteRepository;
+import revisao_oop.models.Book;
+import revisao_oop.models.Review;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-import static reviso_oop.Main.APP_NAME;
-import static reviso_oop.Main.MIN_SIZE_IN_PIXELS;
+import static revisao_oop.Main.APP_NAME;
+import static revisao_oop.Main.MIN_SIZE_IN_PIXELS;
 
 public class ListPageSwing extends javax.swing.JFrame {
 
     final String pageName = "Listagem";
 
-    final LibraryDataBase database;
+    final LibraryRepository database;
 
     final List<Book> books;
     final List<Review> reviews;
@@ -26,7 +27,7 @@ public class ListPageSwing extends javax.swing.JFrame {
         setVisible(true);
         setInitLocalization();
 
-        database = LibraryDataBase.getInstance();
+        database = LibrarySqliteRepository.getInstance();
         books = database.getBooks();
         reviews = database.getReviews();
 
@@ -48,23 +49,23 @@ public class ListPageSwing extends javax.swing.JFrame {
 
 
     String booksToString() {
-        String output = "";
+        StringBuilder output = new StringBuilder();
 
         for (Book b : books)
-            output += "Livro: " + b.title + " " + b.author + " " + b.year + "\n";
+            output.append(b.toPrettyString()).append("\n");
 
 
-        return output;
+        return output.toString();
     }
 
     String reviewsToString() {
-        String output = "";
+        StringBuilder output = new StringBuilder();
 
         for (Review r : reviews)
-            output += "Revista: " + r.title + " " + r.organization + " " + r.volume + " " + r.number + " " + r.year + "\n";
+            output.append(r.toPrettyString()).append("\n");
 
 
-        return output;
+        return output.toString();
     }
 
 

@@ -159,11 +159,11 @@ A aplicação foi ou meu ver bem dividia em subproblemas mas, é uma gambiarra. 
 
 ![tratamento de erro](docs/tratamento_de_erro.png)
 
-[ListPageSwing]:src/main/java/reviso_oop/listItens/ListPageSwing.java
-[LibraryDataBase]:src/main/java/reviso_oop/libraryDataBase/LibraryDataBase.java
-[BookSwingForm]:src/main/java/reviso_oop/addModel/BookSwingForm.java
-[ReviewSwingForm]:src/main/java/reviso_oop/addModel/ReviewSwingForm.java.java
-[AddBookPageSwing]:src/main/java/reviso_oop/addModel/AddBookPageSwing.java
-[AddReviewPageSwing]:src/main/java/reviso_oop/addModel/AddReviewPageSwing.java
-[SwingNavigator]:/src/main/java/reviso_oop/SwingNavigator.java
+[ListPageSwing]:src/main/java/revisao_oop/listItens/ListPageSwing.java
+[LibraryDataBase]:src/main/java/revisao_oop/libraryRepository/LibraryDataBase.java
+[BookSwingForm]:src/main/java/revisao_oop/formPage/BookSwingForm.java
+[ReviewSwingForm]:src/main/java/revisao_oop/formPage/ReviewSwingForm.java.java
+[AddBookPageSwing]:src/main/java/revisao_oop/formPage/AddBookPageSwing.java
+[AddReviewPageSwing]:src/main/java/revisao_oop/formPage/AddReviewPageSwing.java
+[SwingNavigator]:/revisao_oop/SwingNavigator.java
 [SingletonWiki]:https://pt.wikipedia.org/wiki/Singleton

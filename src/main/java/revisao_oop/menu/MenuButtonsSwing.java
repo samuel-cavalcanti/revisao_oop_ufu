@@ -1,8 +1,9 @@
-package reviso_oop.menu;
+package revisao_oop.menu;
 
-import reviso_oop.SwingNavigator;
-import reviso_oop.addModel.AddBookPageSwing;
-import reviso_oop.addModel.AddReviewPageSwing;
+import revisao_oop.Navigator.Pages;
+import revisao_oop.Navigator.SwingNavigator;
+import revisao_oop.formPage.FormPageBuilder;
+import revisao_oop.listItens.ListPageSwing;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MenuButtonsSwing extends JPanel {
+
 
     public final JButton addButton;
 
@@ -22,20 +24,21 @@ public class MenuButtonsSwing extends JPanel {
 
         setLayout(new FlowLayout());
 
-        goToAddBookPageButton = new JButton(AddBookPageSwing.pageName);
+        goToAddBookPageButton = new JButton(Pages.books);
 
-        goToReviewPageButton = new JButton(AddReviewPageSwing.pageName);
-
+        goToReviewPageButton = new JButton(Pages.reviews);
 
         addButton = new JButton("Incluir");
 
-        showListPage = new JButton("Listagem");
+        showListPage = new JButton(Pages.list);
+
+
         add(addButton);
 
-        if (!currentPage.equals(AddBookPageSwing.pageName))
+        if (!currentPage.equals(Pages.books))
             add(goToAddBookPageButton);
 
-        if (!currentPage.equals(AddReviewPageSwing.pageName))
+        if (!currentPage.equals(Pages.reviews))
             add(goToReviewPageButton);
 
 
@@ -51,23 +54,23 @@ public class MenuButtonsSwing extends JPanel {
         showListPage.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-
-
-                navigator.goToListPage();
+                new ListPageSwing();
             }
         });
 
         goToAddBookPageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                navigator.goToAddBook();
+
+                navigator.goToPage(FormPageBuilder.buildBookPage());
             }
         });
 
         goToReviewPageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                navigator.goToAddReview();
+
+                navigator.goToPage(FormPageBuilder.buildReviewPage());
             }
         });
     }
